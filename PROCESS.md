@@ -80,6 +80,48 @@ after it
 A spec test asserts the behaviour so it can't quietly regress. Full range:
 [`1691ec8...2398a0a`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/compare/1691ec8...2398a0a).
 
+### 4. Taking the visual judgement away from the model
+
+The last third of the build was layout work — cars sitting on the grid, a sign
+that reads as signage, text clearing the artwork behind it. Claude's instinct
+throughout was to check its own work by rendering: drive a headless browser,
+screenshot the page, look at the image, decide it was fine.
+
+It was not fine, and the loop was expensive:
+
+> Claude kept trying to look at the website and render it out as an image
+> itself, which kept costing tokens and time, and when it sometimes actually
+> worked it didn't even make the correct changes — so I told it to always let me
+> inspect it visually, then I'll tell it what to change.
+
+The failure is worth naming precisely, because "it couldn't see properly" is the
+wrong diagnosis. It could produce the picture. What it could not do reliably was
+*judge* the picture — decide whether the spacing read as deliberate, whether text
+was legible over a busy background, whether the thing looked right. Adding a
+screenshot to that loop doesn't repair the judgement; it just makes a bad
+judgement cost four tool calls and a couple of minutes each time, and dresses it
+up as verified.
+
+So the harness changed rather than the technique
+([`b6f683b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/commit/b6f683b)):
+make the change, run `pnpm check`, say where to look, hand it over. I look. I say
+what's wrong. That splits the work along the line where each side is actually
+reliable — the model is good at deriving geometry and holding the timing rules
+straight, I'm good at looking at a page and knowing it's wrong.
+
+The rule draws one distinction rather than banning rendering outright. Reading
+pixel coordinates out of the track artwork to place an element is still fine,
+because it produces a number that can be checked — the six grid rows in this
+build were measured that way, and the front-row figures the scan produced matched
+the ones already in the stylesheet, which is what made the rest trustworthy.
+Deciding a layout looks good is not that. One is a measurement, the other is an
+opinion, and only the first one survives being made by something that can't see.
+
+It also caught a habit worth flagging in its own right: the model was reporting
+visual outcomes as verified when what it had really done was look at its own
+render and agree with itself. The rule now says a claim about pixels isn't its
+claim to make.
+
 ## What I'd fix with more time
 
 The commit history is honest but compressed — this was built in one sitting
