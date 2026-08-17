@@ -43,28 +43,54 @@ body {
   overflow-x: hidden;
 }
 
-nav {
+/* Hidden by default so the sky starts at the very top of the page, but still
+   a real landmark and still keyboard-reachable — it drops into view the
+   moment anything inside it takes focus. */
+.skip-nav {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-nav:focus-within {
+  position: static;
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
-  padding: 1rem clamp(1rem, 5vw, 4rem);
-  border-bottom: 1px solid var(--rule);
+  width: auto;
+  height: auto;
+  padding: 0.75rem clamp(1rem, 5vw, 4rem);
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  background: var(--blue-deep);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-
-  /* transparent so the sky starts at the very top of the page */
-  background: transparent;
 }
 
-nav a {
+.skip-nav a {
   color: var(--muted);
   text-decoration: none;
 }
 
-nav a:hover,
-nav a:focus-visible {
+.skip-nav a:hover,
+.skip-nav a:focus-visible {
   color: var(--cream);
+}
+
+/* The interaction lives in the racing line between the two panels, so it has
+   to stay narrow enough to fit the corridor and above the artwork. */
+.controls {
+  position: relative;
+  z-index: 2;
+  max-width: 20rem;
+  margin: 0 auto;
+  text-align: center;
 }
 
 main {
@@ -249,18 +275,19 @@ h2 {
   transform: translateX(-50%);
 
   /* The artwork carries roughly a quarter of transparent sky above the
-     grandstands. Pulling that back up costs nothing — the same gradient sits
-     behind it — and brings the horizon above the fold instead of hiding it
-     under a screenful of empty blue. */
-  margin-top: -18%;
+     grandstands, and the gantry's lower third is transparent too. Pulling the
+     straight up through both costs nothing — the same gradient sits behind
+     them — and brings the grandstands right up under the lights. */
+  margin-top: -34%;
+}
 
-  /* The track is the backdrop rather than a block of its own, so the panels
-     sit on it and the page ends where the track does. No continuation strip
-     is needed. */
-  background-image: url("/track-nosky.png");
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: 100% auto;
+/* An <img>, not a background: the whole straight has to stay in frame down to
+   the bottom edge, and a background sized to a content-driven box crops it. */
+.scene-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
 }
 
 .scene-inner {
@@ -268,7 +295,7 @@ h2 {
      and leave the racing line clear between them */
   max-width: 82rem;
   margin: 0 auto;
-  padding: 22% clamp(1rem, 3vw, 2rem) 4%;
+  padding: 0 clamp(1rem, 3vw, 2rem) 3rem;
   display: grid;
   gap: clamp(1rem, 3vw, 2rem);
 }
@@ -288,13 +315,51 @@ h2 {
   border-top: 0;
 }
 
-@media (width >= 60rem) {
+/* Overlay the panels on the grandstands so the whole straight stays visible
+   beneath them. 72rem, not 60: below this the two panels plus the racing-line
+   corridor between them don't fit side by side, and the controls end up
+   underneath a panel. Narrower than this, the panels flow below the artwork
+   instead — which is also the only thing that works on a phone, where the
+   stacked panels are far taller than the image. */
+@media (width >= 72rem) {
   .scene-inner {
-    /* two panels, one over each grandstand, with the track between them */
-    grid-template-columns: minmax(0, 27rem) minmax(0, 27rem);
-    justify-content: space-between;
+    position: absolute;
+    inset: 0;
+    padding-bottom: 0;
+
+    /* Tops sit just under the gantry's bottom bar. The 34% cancels the pull
+       the scene applies to itself, which scales with viewport width; the
+       fixed offset then walks back up from the bottom of the interaction
+       column to just below the lights. Without the cancellation the panels
+       drift over the gantry as the window widens, because the artwork keeps
+       scaling while the gantry is capped at the reading column's width. */
+    padding-top: calc(34% - 154px);
+
+    /* an explicit centre column keeps the racing line clear at every width,
+       so the controls always have room rather than being squeezed out */
+    grid-template-columns: minmax(0, 1fr) 22rem minmax(0, 1fr);
     align-items: start;
     gap: 0;
+    pointer-events: none;
+  }
+
+  .scene section {
+    pointer-events: auto;
+  }
+
+  #comparison {
+    grid-column: 1;
+  }
+
+  #provenance {
+    grid-column: 3;
+  }
+
+  /* panels are narrow here; stacked rows read better than the wide
+     label/track/value split */
+  .scene .band-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
   }
 }
 

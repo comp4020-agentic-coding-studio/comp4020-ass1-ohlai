@@ -14,7 +14,10 @@
     <!-- everything down to the horizon shares one sky gradient; the track
          artwork's sky is transparent, so the gradient shows through it -->
     <div class="sky">
-      <nav aria-label="Sections">
+      <!-- Visually hidden, but focusable: the landmark and keyboard route
+           survive while the masthead stays clear for the artwork. Appears on
+           keyboard focus, as a skip-nav should. -->
+      <nav aria-label="Sections" class="skip-nav">
       <a href="#test">The test</a>
       <a href="#comparison">The comparison</a>
       <a href="#provenance">Where the numbers come from</a>
@@ -51,20 +54,24 @@
           </div>
         </div>
 
-        <button
-          id="pad"
-          class="pad"
-          type="button"
-          aria-describedby="pad-hint"
-        >
-          <span id="pad-label">Hold space to start</span>
-        </button>
-        <p id="pad-hint" class="hint">
-          Hold the space bar — or press and hold this pad on a touchscreen. The
-          lights come on one by one. When all five go out, let go.
-        </p>
+        <!-- narrow, so on a wide screen it sits in the racing line between
+             the two panels rather than colliding with them -->
+        <div class="controls">
+          <button
+            id="pad"
+            class="pad"
+            type="button"
+            aria-describedby="pad-hint"
+          >
+            <span id="pad-label">Hold space to start</span>
+          </button>
+          <p id="pad-hint" class="hint">
+            Hold space, or press and hold this pad. When all five lights go
+            out, let go.
+          </p>
 
-        <output id="result" class="result" aria-live="polite"></output>
+          <output id="result" class="result" aria-live="polite"></output>
+        </div>
       </section>
     </main>
 
@@ -77,6 +84,8 @@
         role="img"
         aria-label="The start straight, seen from the grid"
       >
+        <img class="scene-img" src="/track-nosky.png" alt="" />
+
         <div class="scene-inner">
           <section id="comparison" aria-labelledby="comparison-heading">
           <h2 id="comparison-heading">Where that puts you</h2>
