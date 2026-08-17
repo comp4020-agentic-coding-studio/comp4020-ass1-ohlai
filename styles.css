@@ -131,8 +131,9 @@ body {
   background-position: 49.95% 77.92%;
 
   /* the board is a quarter narrower than the page's body copy, so its type
-     steps down with it rather than wrapping every couple of words */
-  font-size: 0.875rem;
+     steps down with it rather than wrapping every couple of words. The extra
+     0.025rem over the old 0.875 is the width the board gained. */
+  font-size: 0.9rem;
 
   /* clear of the bolted frame, whose inner edge sits ~5.7% in */
   padding: 8% 9% 9%;
@@ -429,9 +430,27 @@ h2 {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--cream);
-  background: var(--blue-deep);
-  border: 1px solid var(--rule);
+
+  /* Built as a sixth lamp housing rather than a button: the same dark casing
+     and tan rim as the five overhead. `--blue-deep` on `--sky-mid` was two
+     steps apart on one hue, so the pad's edges dissolved into the sky. Casing
+     against sky is a value contrast, which survives at any size and on a phone
+     in sunlight. It also keeps race red for the lights alone, so the control
+     never competes with the signal it is asking you to watch. */
+  background: linear-gradient(
+    180deg,
+    var(--housing-hi) 0%,
+    var(--housing) 55%,
+    var(--housing-lo) 100%
+  );
+  border: 2px solid var(--tan);
   border-radius: 0.4rem;
+
+  /* rim light along the top, then a plinth the pad appears to stand on */
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 4px 0 #0b0b0d,
+    0 10px 18px rgb(0 0 0 / 40%);
   cursor: pointer;
   touch-action: none;
   user-select: none;
@@ -442,10 +461,17 @@ h2 {
   outline-offset: 3px;
 }
 
+/* Lights out. The housing goes from dark to lit, which is the same event the
+   gantry above is showing. The plinth lightens with it so the pad reads as
+   illuminated rather than as a cream card sitting on a black shadow. */
 .pad[data-phase="out"] {
+  color: var(--blue-deep);
   background: var(--cream);
   border-color: var(--cream);
-  color: var(--blue-deep);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    0 4px 0 #b9b3a5,
+    0 10px 22px rgb(243 237 225 / 28%);
 }
 
 .hint {
@@ -570,6 +596,21 @@ h2 {
   box-shadow: 0 0 0.8rem var(--red);
 }
 
+/* Earlier attempts, in the marker's red at low alpha. Shorter and thinner than
+   the live marker so the latest reading still reads first, and translucent so
+   two attempts landing together stack into a darker mark — the spread draws
+   its own density without counting anything. */
+.ghost {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 125%;
+  background: rgb(238 44 34 / 45%);
+  transform: translateX(-50%);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
 .verdict {
   color: #dce9f5;
 }
@@ -635,16 +676,83 @@ code {
 }
 
 /* Sign overrides live down here so they follow the base `h2` and `.band-row`
-   they override, keeping specificity in source order. */
+   they override, keeping specificity in source order.
+
+   The board is signage, not body copy, so it is set like signage: everything
+   is a label or a figure, labels are small and widely tracked in the metal's
+   own tan, and the figures are the only thing allowed to be large. The system
+   sans stays — no webfont can ship here — so the character has to come from
+   weight, tracking, case and rules instead of from a face. */
 .sign-board h2 {
   margin: 0 0 0.75rem;
   padding-top: 0;
   border-top: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--tan-light);
+}
+
+/* A ruled band, the way a pit board sets off the numbers that matter. The
+   rules are the tan at low alpha rather than the generic `--rule`, so they
+   read as scored into the metal rather than drawn on top of it. */
+.sign-board .scores {
+  gap: 0;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid rgb(200 187 161 / 30%);
+  border-bottom: 1px solid rgb(200 187 161 / 30%);
+}
+
+.sign-board .scores dt {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--tan-light);
+}
+
+.sign-board .scores dd {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--cream);
+}
+
+/* Band headings become labels too, which puts them in the same voice as the
+   score labels above and stops the chart reading as a paragraph with bars. */
+.sign-board .band-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--tan-light);
+}
+
+.sign-board .band-range {
+  font-size: 0.72rem;
+}
+
+/* the one full sentence on the board, kept quiet under the figures */
+.sign-board .verdict {
+  font-size: 0.82rem;
+}
+
+/* display sizes need the tracking pulled back in */
+.sign-board .result[data-kind="time"] {
+  letter-spacing: -0.03em;
 }
 
 /* .board-head owns the gap below the row, so the heading adds none of its own */
 .board-head h2 {
   margin: 0;
+}
+
+/* The heading shares its row with the attempt's own number, and tracked-out
+   uppercase wraps early. Keep it on one line and let the number, which has a
+   max-width and balanced wrapping of its own, be the part that gives. */
+.sign-board .board-head h2 {
+  white-space: nowrap;
 }
 
 /* the board is narrow, so stacked rows beat the label/track/value split */

@@ -29,6 +29,15 @@ let timers: number[] = [];
 let best: number | null = readBest();
 let jumps = 0;
 
+// Every measured attempt this session, oldest first, drawn behind the live
+// marker as a faded trail. One reading says almost nothing — reaction time
+// varies far more within a person than the gap between a visitor and a driver
+// does — so showing the spread is what makes the comparison honest.
+//
+// In memory only, deliberately. CLAUDE.md keeps localStorage to the personal
+// best, and a trail that survived reloads would mix sessions into one cloud.
+const attempts: number[] = [];
+
 // --- storage: best effort, must work when unavailable (CLAUDE.md "Storage")
 
 function readBest(): number | null {
@@ -216,6 +225,21 @@ function renderChart(): void {
 function renderMarker(ms: number): void {
   const marker = document.querySelector<HTMLElement>("#marker")!;
   const value = document.querySelector<HTMLElement>("#marker-value")!;
+  const track = marker.parentElement!;
+
+  attempts.push(ms);
+
+  // Redraw the whole trail rather than appending one ghost, so the marks can
+  // never drift out of step with `attempts`. At the counts a visitor produces
+  // this is far too cheap to be worth tracking nodes individually.
+  for (const stale of track.querySelectorAll(".ghost")) stale.remove();
+  for (const past of attempts.slice(0, -1)) {
+    const ghost = document.createElement("span");
+    ghost.className = "ghost";
+    ghost.style.left = `${scale(past)}%`;
+    track.append(ghost);
+  }
+
   marker.hidden = false;
   marker.style.left = `${scale(ms)}%`;
   value.textContent = `${ms} ms`;
