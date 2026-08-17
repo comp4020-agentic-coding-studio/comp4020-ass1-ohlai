@@ -20,18 +20,9 @@
       <nav aria-label="Sections" class="skip-nav">
       <a href="#test">The test</a>
       <a href="#comparison">The comparison</a>
-      <a href="#provenance">Where the numbers come from</a>
     </nav>
 
     <main>
-      <header class="intro">
-        <h1>Lights out.</h1>
-        <p class="thesis">
-          The start is the one moment in Formula 1 you can also do: see a light
-          go out, and move. Find out by how little you lose.
-        </p>
-      </header>
-
       <section id="test" aria-label="The test">
         <div
           class="gantry"
@@ -39,12 +30,27 @@
           role="img"
           aria-label="Formula 1 start gantry: five columns of four lamps, mounted on a crossbeam"
         >
-          <!-- the crossbeam continued to the window edges, sampled from the
-               artwork's own outermost pixels so it matches exactly -->
-          <span class="edge edge-left" aria-hidden="true"></span>
-          <span class="edge edge-right" aria-hidden="true"></span>
+          <!-- Inside the gantry so its desktop placement can hang off the
+               beam mirrored to the sign, the same way the sign hangs off the
+               left. Below that width it just sits first in flow, above the
+               lights, as the page masthead always did. -->
+          <header class="intro">
+            <h1>Lights out.</h1>
+            <p class="thesis">
+              The start is the one moment in Formula 1 you can also do: see a light
+              go out, and move. Find out by how little you lose.
+            </p>
+          </header>
 
           <div class="gantry-stage">
+            <!-- The crossbeam continued to the window edges, sampled from the
+                 artwork's own outermost pixels so it matches exactly. These
+                 live inside the stage, not the gantry: the gantry also holds
+                 the sign in the stacked layout, so anchoring to it would
+                 stretch the beam down the whole sign. -->
+            <span class="edge edge-left" aria-hidden="true"></span>
+            <span class="edge edge-right" aria-hidden="true"></span>
+
             <img class="gantry-base" src="/gantry-off.png" alt="" />
             <span class="column" data-column="1"></span>
             <span class="column" data-column="2"></span>
@@ -52,15 +58,20 @@
             <span class="column" data-column="4"></span>
             <span class="column" data-column="5"></span>
           </div>
-        </div>
 
-        <!-- The board hangs off the gantry's bottom bar: the straps are the
-             artwork's own, cropped out of the same PNG as the board. -->
+        <!-- Inside the gantry so it can hang off the beam: .gantry is the
+             positioned ancestor the desktop layout anchors to. The straps are
+             the artwork's own, cropped from the same PNG as the board. -->
         <div class="sign">
           <span class="sign-straps" aria-hidden="true"></span>
           <div class="sign-board">
             <section id="comparison" aria-labelledby="comparison-heading">
-              <h2 id="comparison-heading">Where that puts you</h2>
+              <!-- The attempt's own number is the board's headline, so it sits
+                   opposite the heading rather than below the pad. -->
+              <div class="board-head">
+                <h2 id="comparison-heading">Where that puts you</h2>
+                <output id="result" class="result" aria-live="polite"></output>
+              </div>
 
               <dl class="scores">
                 <div>
@@ -78,24 +89,8 @@
                 Have a go and your time will appear on the scale.
               </p>
             </section>
-
-            <section id="provenance" aria-labelledby="provenance-heading">
-              <h2 id="provenance-heading">Where the numbers come from</h2>
-              <p>
-                Only one number on this page is measured: yours. The bands are
-                <em>reported</em> ranges, not a measured distribution of named
-                drivers — F1's per-start telemetry isn't published, and the
-                figures circulating online trace back to reaction-test sites
-                that cite nothing and disagree with each other.
-              </p>
-              <p>
-                So this page shows a band with its uncertainty visible rather
-                than a bell curve that would look authoritative and be
-                invented. Full provenance, including what could not be
-                sourced, is in <code>data/sources.md</code> in the repository.
-              </p>
-            </section>
           </div>
+        </div>
         </div>
 
         <div class="controls">
@@ -111,8 +106,6 @@
             Hold space, or press and hold this pad. When all five lights go
             out, let go.
           </p>
-
-          <output id="result" class="result" aria-live="polite"></output>
         </div>
       </section>
     </main>
@@ -128,6 +121,11 @@
       >
         <img class="scene-img" src="/track-nosky.png" alt="" />
 
+        <!-- The front row, parked on the grid. One slice of `cars.png` per
+             car, each laid on the box the track artwork already paints, so
+             the cars belong to the straight rather than floating over it. -->
+        <span class="grid-car grid-car-left" aria-hidden="true"></span>
+        <span class="grid-car grid-car-right" aria-hidden="true"></span>
       </div>
     </div>
 

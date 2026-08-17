@@ -88,21 +88,30 @@ body {
    two files. In sign-nobar.png (1086x1448) the board occupies x 148-937,
    y 374-1341, with its hanging straps directly above at y 90-374.
 
-   Each piece scales the image so its own region fills the element:
-     width  1086/790 = 137.5%      and the x offset is the same for both,
-     -148/(1086-790) = -50%, so the straps stay registered to the board.
+   Each piece scales the image so its own region fills the element, then
+   offsets it. CSS resolves a percentage position as
+     offset = P% x (elementSize - imageSize)
+   and the image here is larger than the element, so that bracket is already
+   negative and P must be POSITIVE to shift the art left/up:
+     x: (148/790) / (1086/790 - 1) = 49.95%, shared by both pieces so the
+     straps stay registered to the board.
 
    The straps keep the artwork's aspect so they never distort; the board is
    free to stretch vertically with however much content it holds, which only
    stretches flat metal. */
 
 .sign {
-  max-width: 32rem;
+  /* Lifted over the straight: the scene is a later sibling of `main`, so
+     without this the board paints underneath the track artwork. */
+  position: relative;
+  z-index: 3;
+  max-width: 18rem;
 
   /* The gantry PNG carries ~16% transparent space below its bottom bar, so
      the straps would otherwise start well clear of the bar and float. This
      closes that gap (less the -4% the gantry already pulls back) and leaves a
-     slight overlap, so the straps read as bolted to the bar. */
+     slight overlap, so the straps read as bolted to the bar. The percentage
+     resolves against .gantry, so it tracks the gantry's own scale. */
   margin: -14.2% auto 0;
 }
 
@@ -112,14 +121,18 @@ body {
   background-image: url("/sign-nobar.png");
   background-repeat: no-repeat;
   background-size: 137.5% 509.9%;
-  background-position: -50% -7.73%;
+  background-position: 49.95% 7.73%;
 }
 
 .sign-board {
   background-image: url("/sign-nobar.png");
   background-repeat: no-repeat;
   background-size: 137.5% 149.59%;
-  background-position: -50% -77.92%;
+  background-position: 49.95% 77.92%;
+
+  /* the board is a quarter narrower than the page's body copy, so its type
+     steps down with it rather than wrapping every couple of words */
+  font-size: 0.875rem;
 
   /* clear of the bolted frame, whose inner edge sits ~5.7% in */
   padding: 8% 9% 9%;
@@ -209,15 +222,25 @@ h2 {
 
 .gantry {
   position: relative;
+  width: 85%;
 
-  /* the artwork carries ~20% transparent sky above and ~16% below; pull the
-     surrounding content back into it rather than shipping dead space */
-  margin-block: -7% -4%;
+  /* The artwork carries ~16% transparent space below its bottom bar; pull
+     the following sibling (.controls) back into it rather than shipping
+     dead space. Percentage margins resolve against `main`, not against
+     .gantry, so this is the original -4% scaled by the 85% above —
+     otherwise shrinking the gantry would over-crop it. The top crop lives on
+     .gantry-stage instead, now that the masthead sits above it inside here. */
+  margin: 0 auto -3.4%;
 }
 
 .gantry-stage {
   position: relative;
   z-index: 1;
+
+  /* The artwork carries ~20% transparent sky above; pull the masthead above
+     it back into that space rather than shipping dead space. This resolves
+     against .gantry's own width, so it's the original -7% unscaled. */
+  margin-top: -7%;
 }
 
 .gantry-base {
@@ -344,6 +367,55 @@ h2 {
   pointer-events: none;
 }
 
+/* --- the front row -----------------------------------------------------
+   The two cars, sitting on the grid the track artwork already paints. One
+   slice of `cars.png` each rather than the whole PNG scaled: the two cars
+   sit closer together in that image than the two boxes do on this track, so
+   a single image can match either the size or the spacing but never both.
+   Placed separately, each car lands on its own box at its own size.
+
+   Every number below is measured from the sources, not guessed. In
+   `cars.png` (1750x700) the Ferrari occupies x 54-597, y 63-624 and the
+   McLaren x 1181-1726, y 58-619. In `track-nosky.png` (1373x1145) the
+   front-row boxes are x 451-571 and x 792-913, both with their near edge —
+   where the tyres meet the tarmac — at y 944. Each value is one of those
+   divided by its own image's dimension, so the cars stay welded to the
+   tarmac at every viewport width. */
+
+.grid-car {
+  position: absolute;
+
+  /* (1145 - 944) / 1145 — tyres on the box's near edge, so the car reads as
+     standing in its box rather than hovering over it. */
+  bottom: 17.554%;
+  background-image: url("/cars.png");
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* Each car is sized to its own box: width from the painted box, height from
+   that width times the car's own aspect in the source, so nothing stretches.
+   background-size is (1750 / crop width) and (700 / crop height);
+   background-position is (crop x / (1750 - crop width)) and
+   (crop y / (700 - crop height)), which is what lands the intended car in
+   the box and leaves the other one outside it. */
+
+.grid-car-left {
+  left: 32.847%; /* 451 / 1373 */
+  width: 8.813%; /* 121 / 1373 */
+  height: 10.917%; /* 121 * (562 / 544) / 1145 */
+  background-size: 321.691% 124.555%;
+  background-position: 4.478% 45.652%;
+}
+
+.grid-car-right {
+  left: 57.684%; /* 792 / 1373 */
+  width: 8.885%; /* 122 / 1373 */
+  height: 10.967%; /* 122 * (562 / 546) / 1145 */
+  background-size: 320.513% 124.555%;
+  background-position: 98.09% 42.029%;
+}
+
 
 
 /* --- pad --- */
@@ -382,25 +454,45 @@ h2 {
   margin: 0.5rem 0 0;
 }
 
+/* The heading and the attempt's own number, one line, opposite ends of the
+   board. Baseline alignment keeps the number sitting on the heading's line
+   however large the number's type gets. */
+.board-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Only a measured time gets the headline size. The other two states are
+   sentences — a jump start, or an abandoned attempt — and setting those in
+   display type would shout them across the whole board. */
 .result {
   display: block;
-  font-size: clamp(1.75rem, 7vw, 3rem);
-  font-weight: 800;
+  flex: 0 1 auto;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+  text-align: right;
+  text-wrap: balance;
 
-  /* reserved so the layout doesn't jump when a time lands, but no larger
-     than the line it has to hold */
-  min-height: 1.15em;
-  margin: 0.5rem 0 0;
+  /* reserved so the row doesn't jump when a time lands */
+  min-height: 2rem;
+  max-width: 11rem;
 }
 
 .result[data-kind="jump"] {
   color: var(--red-hot);
-  font-size: clamp(1.1rem, 4vw, 1.6rem);
 }
 
 .result[data-kind="time"] {
   color: var(--cream);
+  font-size: clamp(1.5rem, 4.5vw, 2rem);
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .scores {
@@ -497,12 +589,54 @@ code {
   }
 }
 
+/* Desktop: hang the sign off the left of the gantry and the masthead off the
+   right, out in the bleed where the crossbeam runs on to the window edges.
+   There is no room for either under the housings without covering the
+   lights, and the beam out here is already the thing they bolt to. Taking
+   the masthead out of flow also lifts .gantry-stage back up to the top,
+   where the interaction wants the lights. Below this width both stay in
+   flow, centred — the bleed is too narrow to hold either legibly. */
+@media (width >= 72rem) {
+  .sign {
+    position: absolute;
+
+    /* The top edge of the UPPER beam, 264/1145 down the gantry artwork. The
+       straps therefore cross both beams rather than starting below them, and
+       the higher z-index above lets them read as bolted over the front. */
+    top: 23.1%;
+
+    /* Right edge further left than the first housing, which starts 10.8%
+       across the artwork — so the board sits deeper in the bleed without
+       ever covering a light. Width then runs from there to the window edge,
+       which is 50vw minus the gantry's own left offset. */
+    right: 98%;
+    width: min(16rem, calc(50vw - 32% - 1.5rem));
+    margin: 0;
+  }
+
+  /* Mirrored onto the right of the gantry, hanging off the same beam the
+     sign hangs off on the left, rather than sitting above the lights as the
+     page masthead. */
+  .intro {
+    position: absolute;
+    top: 23.1%;
+    left: 98%;
+    width: min(16rem, calc(50vw - 32% - 1.5rem));
+    margin: 0;
+  }
+}
+
 /* Sign overrides live down here so they follow the base `h2` and `.band-row`
    they override, keeping specificity in source order. */
 .sign-board h2 {
   margin: 0 0 0.75rem;
   padding-top: 0;
   border-top: 0;
+}
+
+/* .board-head owns the gap below the row, so the heading adds none of its own */
+.board-head h2 {
+  margin: 0;
 }
 
 /* the board is narrow, so stacked rows beat the label/track/value split */
