@@ -1,85 +1,88 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
-A reading-guide to how the work came together --- a map to your process, not an
-essay about it. Markers read this file and follow its citations; they don't
-trawl the repo for evidence you didn't point at, so if a moment mattered, cite
-it.
-
-This file is the shape; the course site's
-[assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-is the requirement, and its
-[word counts](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts)
-cover every deliverable.
-
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+**Lights Out** is an interactive explainer about reaction time at a Formula 1
+race start. You hold the space bar, five red lights come on one by one, and
+after a randomised hold they all go out at once. You release. The page measures
+the gap and places it against what F1 drivers are reported to manage. The idea
+it argues: the start is the one moment in the sport where an ordinary person is
+in the same order of magnitude as a professional, and that tells you the skill
+in F1 lives everywhere *except* the reflex everyone thinks it's about.
 
 ## The moments that mattered
 
-Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
-list short so each moment has room to do all four jobs:
+### 1. Writing the harness before writing any code
 
-1. **what happened** --- the problem, or the thing that went wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
+The whole build ran under a deadline, which is exactly when it's tempting to
+start typing at the prototype and sort the rules out later. I did the opposite
+and committed `CLAUDE.md` on its own as the first commit of the repo
+([`1691ec8`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/commit/1691ec8)),
+before a line of the prototype existed. It fixed the timing rules
+(`performance.now()`, never `Date.now()`; start the clock in a painted frame,
+not in the `setTimeout` that scheduled it; take the release from the event's own
+`timeStamp`), the jump-start policy, and the data-sourcing constraint.
 
-Jobs 2 and 3 are the ones the repo can't tell a reader on its own, so they're
-where the marks are. The strongest moments are the ones where a correction
-landed in the **harness** --- the standards and checks your work has to satisfy
---- rather than in a retry: a rule added to `CLAUDE.md`, a check wired up, an
-attempt thrown away. Retrying until it passes is the routine case, and changing
-what the work runs against is the skilled one.
+How I knew it was worth it: those rules then did real work rather than
+decorating the repo. The timing rules are why the measurement logic ended up in
+`src/timing.ts` as pure functions with no DOM or clock access — the spec tests
+drive it with known values instead of sleeping and hoping. And the sourcing rule
+is what stopped me shipping invented data (moment 2).
 
-Cite each moment as a link whose text is the commit hash or range and whose
-target is this repo's commit or compare URL, so a reader clicks straight to the
-evidence:
+### 2. The data I refused to ship
 
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
+The design called for placing your time on a distribution of real driver
+reactions. I went looking for that data and it does not exist in any citable
+form: F1's per-start telemetry isn't published, and essentially every figure in
+circulation traces back to reaction-test websites that cite nothing and
+contradict each other.
 
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
+The obvious move was to ship a plausible-looking bell curve with driver names on
+it. Nobody marking this would have caught it. I didn't, because `CLAUDE.md`
+already said no figure ships without provenance in `data/sources.md`, and I'd
+written that rule before I knew it would cost me the nicest visual in the
+project.
 
-> the prompt, verbatim
+What I did instead: the comparison renders **reported bands with their caveats
+visible**, `data/sources.md` records what each figure is, where it came from and
+that its provenance is secondary, and it documents *what could not be sourced
+and why* — a section about absent data, which is unusual to ship and is the most
+honest thing in the repo. The page says out loud that only one number on it is
+actually measured: yours. A spec test fails the build if any shipped figure
+lacks a matching `sourceId` in `sources.md`
+([`4629d97`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/commit/4629d97)).
 
-Screenshots are welcome where one carries the verification better than a
-sentence does. Commit the file to this repo and link it with a **relative**
-path, which is what makes it render on GitHub: `![alt text](docs/before.png)`.
-Images don't count towards the word count and don't replace the citation.
+The constraint made the piece better. "Here is a number and here is exactly how
+much you should trust it" is a stronger point of view than a fake distribution.
 
-### A worked moment, for shape
+### 3. A bug that wasn't, and the real one hiding behind it
 
-Delete this section along with the rest of the boilerplate --- it's here to show
-the four jobs in one paragraph, not to be imitated in content.
+I drove the finished page from a script to check the interaction end to end. A
+release ~180 ms after lights-out reported **1000 ms**. My first instinct was
+that the timing path was broken.
 
-> The date formatter kept coming back with `toLocaleDateString()` and no locale
-> argument, so the same build rendered differently on my machine and in CI. I'd
-> already re-prompted it twice, which fixed the line but not the habit, so the
-> third time I put the rule in `CLAUDE.md` instead
-> ([`3f9ac21`](https://github.com/YOUR-ORG/YOUR-REPO/commit/3f9ac21)) and added
-> a spec test that fails on a bare `toLocaleDateString`. That's what told me it
-> had actually taken: the test went red against the old code and green against
-> the new, and the next two features it wrote passed it without prompting
-> ([`3f9ac21...b7e0d14`](https://github.com/YOUR-ORG/YOUR-REPO/compare/3f9ac21...b7e0d14)).
+Instead of changing the timing code I measured the harness first, and found
+`document.visibilityState === "hidden"`: the tab was backgrounded, so
+`setTimeout` was clamped to ~1 s and my "180 ms" sleep had actually taken 1009
+ms. The app was right and my test was wrong. Changing the timing code would have
+broken working software to satisfy a bad measurement.
 
-## Before you ship
+But the same check exposed a real defect. A hidden tab never paints, so
+`requestAnimationFrame` never fires, `lightsOutAt` stays `null`, and
+`classifyRelease` returns a jump start for *every* release. Correct by the
+function, wrong for the person — they didn't jump, they looked away. The page
+would have blamed the visitor for the browser.
 
-`pnpm check:evidence` verifies your citations resolve to real commits, that the
-current reflection entry is in `reflections/`, and that your `CLAUDE.md` is
-there --- before a marker ever opens the file. It checks that your map is
-traceable, not that it is good: the marker judges whether your small,
-deliberately chosen set of moments shows real judgement and reflection. A green
-check is not a substitute for that curation.
+The fix abandons the attempt instead of scoring it, and the rule went into
+`CLAUDE.md` rather than only into the patch, so it constrains everything written
+after it
+([`2398a0a`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/commit/2398a0a)).
+A spec test asserts the behaviour so it can't quietly regress. Full range:
+[`1691ec8...2398a0a`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-ohlai/compare/1691ec8...2398a0a).
 
-Images are deliberately not checked, because whether one renders is visible the
-moment you look. Open this file on GitHub and look at it before you ship.
+## What I'd fix with more time
+
+The commit history is honest but compressed — this was built in one sitting
+against the deadline, and it reads that way. The comparison deserves real
+sourced data if a primary source can ever be obtained; `sources.md` says exactly
+what would need to arrive for the bands to become a genuine distribution.
