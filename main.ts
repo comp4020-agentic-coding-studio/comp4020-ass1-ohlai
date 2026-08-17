@@ -107,6 +107,31 @@ function release(releaseAt: number): void {
   finish(attempt);
 }
 
+/**
+ * A hidden tab doesn't paint, so requestAnimationFrame never fires and the
+ * lights-out moment never exists. Every release would then be classified a
+ * jump start, which would be a lie — the visitor didn't jump, they just
+ * weren't looking. Abandon the attempt instead of scoring it.
+ */
+function abandon(): void {
+  if (phase === "idle" || phase === "done") return;
+  clearTimers();
+  phase = "done";
+  lightsOutAt = null;
+  gantry.classList.remove("out");
+  setLit(0);
+  pad.dataset.phase = "done";
+  padLabel.textContent = "Again";
+  resultEl.dataset.kind = "";
+  resultEl.textContent = "Attempt abandoned — the page lost focus.";
+  verdictEl.textContent =
+    "Nothing was measured, so nothing is recorded. A time taken while the page was hidden wouldn't be a time.";
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) abandon();
+});
+
 function finish(attempt: Attempt): void {
   phase = "done";
   gantry.classList.remove("out");

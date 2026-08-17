@@ -128,6 +128,14 @@ describe("static and client-side throughout", () => {
   it("takes the release time from the event's own timeStamp", () => {
     expect(source).toMatch(/release\(e\.timeStamp\)/);
   });
+
+  // A hidden tab never paints, so there is no lights-out moment to measure
+  // from. Scoring that as a jump start would blame the visitor for the
+  // browser. The attempt must be abandoned instead.
+  it("abandons an attempt when the page is hidden rather than scoring it", () => {
+    expect(source).toMatch(/visibilitychange/);
+    expect(source).toMatch(/document\.hidden\)\s*abandon\(\)/);
+  });
 });
 
 describe("the page states its core interaction", () => {

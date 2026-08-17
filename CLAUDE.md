@@ -52,6 +52,11 @@ artefact is a lie.
   0.2 and 3.0 seconds. A fixed or predictable delay is a bug, because it makes
   the whole thing learnable and the result meaningless.
 - Report whole milliseconds. Precision beyond that is not real.
+- A hidden tab does not paint, so `requestAnimationFrame` never fires and
+  `setTimeout` is clamped to ~1s. An attempt interrupted by the page being
+  hidden must be **abandoned**, never scored: with no lights-out moment every
+  release would classify as a jump start, which blames the visitor for the
+  browser's behaviour. Do not report a time that was not measured.
 
 ## Interaction rules
 
