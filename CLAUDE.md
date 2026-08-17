@@ -123,6 +123,31 @@ read its output before you change anything.
 - CI (`check` and `deploy`) is gated on the repo being public. While it is
   private, pushing runs nothing — local `pnpm check` is the only feedback loop.
 
+## Checking how it looks
+
+Do not render the site to an image and judge it yourself. No headless browser,
+no screenshots, no contact sheets, no scripted page inspection to decide whether
+something looks right.
+
+It costs a lot of time and tokens, and it does not work. Reading a render back
+and deciding it looks fine repeatedly produced the wrong change, because the
+judgement was the unreliable part and a picture of the page does not fix that.
+
+Instead:
+
+- Make the change, run `pnpm check`, and say what you changed and where to look.
+- Leave the dev server running and hand it over. The human looks at it and says
+  what to fix.
+- Do not claim a visual result you were told rather than saw. "The cars sit on
+  the back row" is a claim about pixels; "the cars are positioned at the
+  measured back-row coordinates" is a claim about the code, and only the second
+  one is yours to make.
+
+This applies to appearance and layout. Rendering is still fine when the answer
+is a measurement rather than a judgement — reading pixel coordinates out of an
+image in `public/` to place an element, for instance — because that produces a
+number that can be checked, not an opinion.
+
 ## Working style
 
 - One change per commit, with a message saying what changed and why.
