@@ -21,10 +21,8 @@
       <header class="intro">
         <h1>Lights out.</h1>
         <p class="thesis">
-          At a Formula 1 start, the driver is doing the one thing in the sport
-          you can also do: seeing a light go out and moving. Everything else —
-          the braking, the tyre management, the car on the limit through Eau
-          Rouge — is beyond you. This isn't. Find out by how little.
+          The start is the one moment in Formula 1 you can also do: see a light
+          go out, and move. Find out by how little you lose.
         </p>
       </header>
 
@@ -66,29 +64,39 @@
         </p>
 
         <output id="result" class="result" aria-live="polite"></output>
-
-        <dl class="scores">
-          <div>
-            <dt>Personal best</dt>
-            <dd id="best">—</dd>
-          </div>
-          <div>
-            <dt>Jump starts</dt>
-            <dd id="jumps">0</dd>
-          </div>
-        </dl>
       </section>
+    </main>
 
-      <section id="comparison" aria-labelledby="comparison-heading">
-        <h2 id="comparison-heading">Where that puts you</h2>
-        <div id="chart" class="chart"></div>
-        <p id="verdict" class="verdict">
-          Have a go and your time will appear on the scale.
-        </p>
-      </section>
+    <!-- the view down the grid: the panorama continues from the gantry's sky
+         into the grandstands and out onto the track -->
+    <div class="straight">
+      <img class="straight-img" src="/track.png" alt="" />
+    </div>
 
-      <section id="provenance" aria-labelledby="provenance-heading">
-        <h2 id="provenance-heading">Where the numbers come from</h2>
+    <div class="tarmac">
+      <main class="tarmac-inner">
+        <section id="comparison" aria-labelledby="comparison-heading">
+          <h2 id="comparison-heading">Where that puts you</h2>
+
+          <dl class="scores">
+            <div>
+              <dt>Personal best</dt>
+              <dd id="best">—</dd>
+            </div>
+            <div>
+              <dt>Jump starts</dt>
+              <dd id="jumps">0</dd>
+            </div>
+          </dl>
+
+          <div id="chart" class="chart"></div>
+          <p id="verdict" class="verdict">
+            Have a go and your time will appear on the scale.
+          </p>
+        </section>
+
+        <section id="provenance" aria-labelledby="provenance-heading">
+          <h2 id="provenance-heading">Where the numbers come from</h2>
         <p>
           Only one number on this page is measured: yours. The bands are
           <em>reported</em> ranges, not a measured distribution of named
@@ -102,8 +110,9 @@
           provenance, including what could not be sourced, is in
           <code>data/sources.md</code> in the repository.
         </p>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
 
     <script type="module" src="/main.ts"></script>
   </body>

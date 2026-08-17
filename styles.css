@@ -30,20 +30,23 @@ html {
 
 body {
   margin: 0;
-  background: var(--blue);
+
+  /* The sky is the track photograph's own topmost pixel row, stretched up
+     behind everything above the straight. Hand-matching a blue would band
+     against the image; taking the colour from the artwork cannot. The
+     gantry PNGs are transparent outside the housings, so this shows through
+     them too and the whole upper page is one continuous sky. */
+  background-color: rgb(8 113 192);
+  background-image: url("/track.png");
+  background-repeat: no-repeat;
+  background-size: 100% 5000%;
+  background-position: 0 0;
   color: var(--cream);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.55;
 
   /* the beam strips run to the window edges; never let that scroll the page */
   overflow-x: hidden;
-
-  /* print grain, matching the reference's halftone texture */
-  background-image: radial-gradient(
-    rgb(0 0 0 / 9%) 0.5px,
-    transparent 0.6px
-  );
-  background-size: 3px 3px;
 }
 
 nav {
@@ -55,7 +58,9 @@ nav {
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  background: var(--blue-deep);
+
+  /* transparent so the sky starts at the very top of the page */
+  background: transparent;
 }
 
 nav a {
@@ -71,7 +76,12 @@ nav a:focus-visible {
 main {
   max-width: 46rem;
   margin: 0 auto;
-  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 2rem) 5rem;
+  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 2rem);
+}
+
+/* the sky half ends flush against the straight, so the panorama is unbroken */
+main:first-of-type {
+  padding-bottom: 0;
 }
 
 h1 {
@@ -211,6 +221,69 @@ h2 {
   width: 13.328%;
   background-size: 750.3% 100%;
   background-position: 87.563% 0;
+}
+
+/* --- the straight -------------------------------------------------------
+   The page reads as one vertical panorama: sky, gantry, sky, grandstands,
+   then the track running out under the reader. The artwork's own sky sits at
+   the top of this image, so it joins the gantry's sky with no seam. */
+
+.straight {
+  position: relative;
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  line-height: 0;
+}
+
+.straight-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The tarmac carries on where the photograph stops. Rather than guessing a
+   colour that would band against the image, it stretches the artwork's own
+   bottom pixel row downwards, so the grass verges and the asphalt continue
+   in the right places at any height. */
+.tarmac {
+  position: relative;
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  margin-top: -1px; /* close the rounding gap under the image */
+  background-image: url("/track.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100000%;
+  background-position: 0 100%;
+}
+
+.tarmac-inner {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 2rem) 5rem;
+}
+
+/* a timing-board panel so the data stays legible over the track */
+.tarmac section {
+  background: rgb(14 14 16 / 82%);
+  border: 1px solid rgb(243 237 225 / 14%);
+  border-radius: 0.4rem;
+  padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 1.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(2px);
+}
+
+/* the trailing margin would otherwise escape the tarmac and show sky
+   below the end of the track */
+.tarmac section:last-child {
+  margin-bottom: 0;
+}
+
+.tarmac h2 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 /* --- pad --- */
