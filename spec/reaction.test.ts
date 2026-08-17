@@ -156,4 +156,17 @@ describe("the page states its core interaction", () => {
   it("offers a pointer path at parity with the keyboard", () => {
     expect(html).toMatch(/id="pad"/);
   });
+
+  // A real start gantry is five columns of four lamps, and only the bottom
+  // pair in a column illuminates. Lights-out clears all of them.
+  it("builds five columns of four lamps", () => {
+    expect(html.match(/class="column"/g)).toHaveLength(5);
+    expect(html.match(/class="lamp"/g)).toHaveLength(20);
+  });
+
+  it("marks each lamp with its row so only the bottom pair can light", () => {
+    for (const row of [1, 2, 3, 4]) {
+      expect(html.match(new RegExp(`data-row="${row}"`, "g"))).toHaveLength(5);
+    }
+  });
 });

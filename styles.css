@@ -1,12 +1,22 @@
+/* Palette sampled from the reference photograph of a start gantry: printed
+   cobalt ground, tan crossbeam, near-black housings, LED-dot lenses. */
 :root {
-  --bg: #0a0a0c;
-  --panel: #141418;
-  --ink: #f2f2f4;
-  --muted: #8b8b96;
-  --red: #e10600;
-  --red-dim: #3a0a08;
-  --accent: #00d2be;
-  --rule: #26262e;
+  --blue: #1d6cb4;
+  --blue-deep: #17568f;
+  --blue-shadow: #124a7c;
+  --tan: #9c8d73;
+  --tan-light: #c0b298;
+  --tan-hi: #c8bba1;
+  --housing: #26262a;
+  --housing-hi: #3a3a40;
+  --housing-lo: #131315;
+  --lens-off: #6b6050;
+  --lens-off-dot: #5a5142;
+  --red: #ee2c22;
+  --red-hot: #ff4a3d;
+  --cream: #f3ede1;
+  --muted: #b9cde2;
+  --rule: rgb(243 237 225 / 18%);
 }
 
 * {
@@ -15,10 +25,17 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--ink);
+  background: var(--blue);
+  color: var(--cream);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.55;
+
+  /* print grain, matching the reference's halftone texture */
+  background-image: radial-gradient(
+    rgb(0 0 0 / 9%) 0.5px,
+    transparent 0.6px
+  );
+  background-size: 3px 3px;
 }
 
 nav {
@@ -30,6 +47,7 @@ nav {
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  background: var(--blue-deep);
 }
 
 nav a {
@@ -39,7 +57,7 @@ nav a {
 
 nav a:hover,
 nav a:focus-visible {
-  color: var(--ink);
+  color: var(--cream);
 }
 
 main {
@@ -55,6 +73,7 @@ h1 {
   letter-spacing: -0.03em;
   text-transform: uppercase;
   font-weight: 800;
+  color: var(--cream);
 }
 
 h2 {
@@ -71,35 +90,130 @@ h2 {
 .thesis {
   font-size: clamp(1.05rem, 2.5vw, 1.3rem);
   max-width: 34rem;
-  color: #d6d6dc;
+  color: #dce9f5;
 }
 
-/* --- gantry --- */
+/* --- gantry -------------------------------------------------------------
+   Five columns of four lamps on a tan crossbeam. Only the bottom two lamps
+   in a column ever illuminate, as on a real gantry; the top pair stay dark.
+   Lights-out clears every column at once. */
 
 .gantry {
+  position: relative;
+  overflow: hidden;
+
+  /* the beam runs off both sides of the housings, as on the real gantry */
+  padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 9%, 5rem);
+  margin-bottom: 1.5rem;
+  isolation: isolate;
+}
+
+/* the crossbeam, passing behind the housings and running off both edges */
+.rail {
+  position: absolute;
+  left: -15%;
+  width: 130%;
+  transform: translateY(-50%);
+  height: clamp(1.4rem, 5.5vw, 2.8rem);
+  background: linear-gradient(
+    180deg,
+    #bdae94 0%,
+    var(--tan) 38%,
+    #6f6553 100%
+  );
+  z-index: 0;
+}
+
+.rail-a {
+  top: 21%;
+}
+
+.rail-b {
+  top: 42%;
+}
+
+/* the horizontal frame bar tying the housings together */
+.crossbar {
+  position: absolute;
+  left: 2%;
+  width: 96%;
+  top: 53%;
+  height: clamp(0.35rem, 1.2vw, 0.6rem);
+  background: var(--housing);
+  z-index: 2;
+}
+
+.columns {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(0.4rem, 2vw, 1rem);
-  background: #050506;
-  border: 1px solid var(--rule);
-  border-radius: 0.75rem;
-  padding: clamp(0.75rem, 3vw, 1.5rem);
-  margin-bottom: 1.5rem;
+  gap: clamp(0.2rem, 1vw, 0.5rem);
 }
 
-.light {
+.column {
+  display: grid;
+  gap: clamp(0.15rem, 0.7vw, 0.35rem);
+  padding: clamp(0.2rem, 0.9vw, 0.45rem);
+  background: linear-gradient(
+    180deg,
+    var(--housing-hi) 0%,
+    var(--housing) 6%,
+    var(--housing) 94%,
+    var(--housing-lo) 100%
+  );
+  border-radius: clamp(0.2rem, 0.8vw, 0.4rem);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 6%),
+    0 0.4rem 1.2rem rgb(0 0 0 / 30%);
+}
+
+/* mounting brackets top and bottom of each housing */
+.mount {
+  justify-self: center;
+  width: 32%;
+  height: clamp(0.3rem, 1.1vw, 0.55rem);
+  background: var(--housing-hi);
+  border-radius: 0.15rem 0.15rem 0 0;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 40%);
+}
+
+.mount-bottom {
+  border-radius: 0 0 0.15rem 0.15rem;
+}
+
+.lamp {
   aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--red-dim);
-  box-shadow: inset 0 0 0 2px #1c1c22;
-  transition: background 60ms linear;
+  background-color: var(--lens-off);
+
+  /* LED dot matrix, as in the reference */
+  background-image: radial-gradient(
+    circle at center,
+    rgb(0 0 0 / 30%) 30%,
+    transparent 32%
+  );
+  background-size: 7% 7%;
+
+  /* bezel ring around each lens, then the recess shadow */
+  box-shadow:
+    0 0 0 clamp(1px, 0.35vw, 3px) #4a463d,
+    inset 0 0 0 clamp(2px, 0.5vw, 4px) #1b1b1d,
+    inset 0 0.15rem 0.4rem rgb(0 0 0 / 55%);
+  transition:
+    background-color 60ms linear,
+    box-shadow 60ms linear;
 }
 
-.light.on {
-  background: var(--red);
+/* only the bottom pair illuminate */
+.column.on .lamp[data-row="3"],
+.column.on .lamp[data-row="4"] {
+  background-color: var(--red);
   box-shadow:
-    inset 0 0 0 2px #1c1c22,
-    0 0 2rem rgb(225 6 0 / 60%);
+    0 0 0 clamp(1px, 0.35vw, 3px) #4a463d,
+    inset 0 0 0 clamp(2px, 0.5vw, 4px) #1b1b1d,
+    inset 0 0.15rem 0.5rem rgb(120 0 0 / 45%),
+    0 0 clamp(0.8rem, 3vw, 2rem) rgb(238 44 34 / 55%);
 }
 
 /* --- pad --- */
@@ -112,24 +226,24 @@ h2 {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink);
-  background: var(--panel);
+  color: var(--cream);
+  background: var(--blue-deep);
   border: 1px solid var(--rule);
-  border-radius: 0.75rem;
+  border-radius: 0.4rem;
   cursor: pointer;
   touch-action: none;
   user-select: none;
 }
 
 .pad:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--tan);
   outline-offset: 3px;
 }
 
 .pad[data-phase="out"] {
-  background: #042e2a;
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--blue-deep);
 }
 
 .hint {
@@ -147,12 +261,12 @@ h2 {
 }
 
 .result[data-kind="jump"] {
-  color: var(--red);
+  color: var(--red-hot);
   font-size: clamp(1.1rem, 4vw, 1.6rem);
 }
 
 .result[data-kind="time"] {
-  color: var(--accent);
+  color: var(--cream);
 }
 
 .scores {
@@ -203,17 +317,16 @@ h2 {
 .track {
   position: relative;
   height: 0.85rem;
-  background: #17171d;
-  border-radius: 0.5rem;
-  overflow: visible;
+  background: var(--blue-shadow);
+  border-radius: 0.15rem;
 }
 
 .band {
   position: absolute;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, #3a3a48, #55556a);
-  border-radius: 0.5rem;
+  background: linear-gradient(90deg, var(--tan), #c0b298);
+  border-radius: 0.15rem;
 }
 
 .you .track {
@@ -226,17 +339,17 @@ h2 {
   top: -0.25rem;
   width: 3px;
   height: 1.3rem;
-  background: var(--accent);
+  background: var(--red-hot);
   transform: translateX(-50%);
-  box-shadow: 0 0 1rem var(--accent);
+  box-shadow: 0 0 0.8rem var(--red);
 }
 
 .verdict {
-  color: #d6d6dc;
+  color: #dce9f5;
 }
 
 code {
-  background: var(--panel);
+  background: var(--blue-deep);
   padding: 0.15em 0.4em;
   border-radius: 0.25rem;
   font-size: 0.9em;
@@ -251,7 +364,7 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .light {
+  .lamp {
     transition: none;
   }
 }

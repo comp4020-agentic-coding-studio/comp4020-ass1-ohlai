@@ -14,7 +14,7 @@ const BEST_KEY = "lights-out:best";
 type Phase = "idle" | "arming" | "lit" | "out" | "done";
 
 const gantry = document.querySelector<HTMLElement>("#gantry")!;
-const lights = [...document.querySelectorAll<HTMLElement>(".light")];
+const columns = [...document.querySelectorAll<HTMLElement>(".column")];
 const pad = document.querySelector<HTMLButtonElement>("#pad")!;
 const padLabel = document.querySelector<HTMLElement>("#pad-label")!;
 const resultEl = document.querySelector<HTMLElement>("#result")!;
@@ -57,8 +57,9 @@ function clearTimers(): void {
   timers = [];
 }
 
+/** Illuminate the first `count` columns; setLit(0) is lights out — all black. */
 function setLit(count: number): void {
-  lights.forEach((el, i) => el.classList.toggle("on", i < count));
+  columns.forEach((el, i) => el.classList.toggle("on", i < count));
 }
 
 function arm(): void {
