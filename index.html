@@ -1,24 +1,102 @@
 <!doctype html>
-<html lang="en-AU">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <title>Lights Out — how close are you to an F1 start?</title>
+    <meta
+      name="description"
+      content="Hold, wait for the lights to go out, and release. Your reaction time, placed against what F1 drivers manage at a race start."
+    />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header>
-      <nav aria-label="Primary">
-        <a href="./">Home</a>
-      </nav>
-    </header>
+    <nav aria-label="Sections">
+      <a href="#test">The test</a>
+      <a href="#comparison">The comparison</a>
+      <a href="#provenance">Where the numbers come from</a>
+    </nav>
+
     <main>
-      <h1>COMP4020 prototype</h1>
-      <p data-testid="intro">
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
+      <header class="intro">
+        <h1>Lights out.</h1>
+        <p class="thesis">
+          At a Formula 1 start, the driver is doing the one thing in the sport
+          you can also do: seeing a light go out and moving. Everything else —
+          the braking, the tyre management, the car on the limit through Eau
+          Rouge — is beyond you. This isn't. Find out by how little.
+        </p>
+      </header>
+
+      <section id="test" aria-labelledby="test-heading">
+        <h2 id="test-heading">Hold, then release</h2>
+
+        <div
+          class="gantry"
+          id="gantry"
+          role="img"
+          aria-label="Five-light F1 start gantry"
+        >
+          <span class="light" data-light="1"></span>
+          <span class="light" data-light="2"></span>
+          <span class="light" data-light="3"></span>
+          <span class="light" data-light="4"></span>
+          <span class="light" data-light="5"></span>
+        </div>
+
+        <button
+          id="pad"
+          class="pad"
+          type="button"
+          aria-describedby="pad-hint"
+        >
+          <span id="pad-label">Hold space to start</span>
+        </button>
+        <p id="pad-hint" class="hint">
+          Hold the space bar — or press and hold this pad on a touchscreen. The
+          lights come on one by one. When all five go out, let go.
+        </p>
+
+        <output id="result" class="result" aria-live="polite"></output>
+
+        <dl class="scores">
+          <div>
+            <dt>Personal best</dt>
+            <dd id="best">—</dd>
+          </div>
+          <div>
+            <dt>Jump starts</dt>
+            <dd id="jumps">0</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="comparison" aria-labelledby="comparison-heading">
+        <h2 id="comparison-heading">Where that puts you</h2>
+        <div id="chart" class="chart"></div>
+        <p id="verdict" class="verdict">
+          Have a go and your time will appear on the scale.
+        </p>
+      </section>
+
+      <section id="provenance" aria-labelledby="provenance-heading">
+        <h2 id="provenance-heading">Where the numbers come from</h2>
+        <p>
+          Only one number on this page is measured: yours. The bands are
+          <em>reported</em> ranges, not a measured distribution of named
+          drivers — F1's per-start telemetry isn't published, and the figures
+          circulating online trace back to reaction-test sites that cite nothing
+          and disagree with each other.
+        </p>
+        <p>
+          So this page shows a band with its uncertainty visible rather than a
+          bell curve that would look authoritative and be invented. Full
+          provenance, including what could not be sourced, is in
+          <code>data/sources.md</code> in the repository.
+        </p>
+      </section>
     </main>
-    <script type="module" src="./main.ts"></script>
+
+    <script type="module" src="/main.ts"></script>
   </body>
 </html>

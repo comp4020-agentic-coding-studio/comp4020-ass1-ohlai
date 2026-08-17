@@ -1,8 +1,225 @@
-// Your prototype's TypeScript goes here. This file exists so the lint
-// sensor has something to check from day one. If the week's spec rules out
-// JavaScript, delete this file and the script tag in index.html — the site
-// you ship has to meet the spec, not the template's defaults.
-const intro = document.querySelector<HTMLElement>('[data-testid="intro"]');
-if (intro) {
-  intro.dataset.ready = "true";
+import reactions from "./data/reactions.json";
+import {
+  classifyRelease,
+  isArmingKeydown,
+  isReleaseKeyup,
+  nextBest,
+  randomHoldMs,
+  type Attempt,
+} from "./src/timing";
+
+const LIGHT_INTERVAL_MS = 1000;
+const BEST_KEY = "lights-out:best";
+
+type Phase = "idle" | "arming" | "lit" | "out" | "done";
+
+const gantry = document.querySelector<HTMLElement>("#gantry")!;
+const lights = [...document.querySelectorAll<HTMLElement>(".light")];
+const pad = document.querySelector<HTMLButtonElement>("#pad")!;
+const padLabel = document.querySelector<HTMLElement>("#pad-label")!;
+const resultEl = document.querySelector<HTMLElement>("#result")!;
+const bestEl = document.querySelector<HTMLElement>("#best")!;
+const jumpsEl = document.querySelector<HTMLElement>("#jumps")!;
+const chartEl = document.querySelector<HTMLElement>("#chart")!;
+const verdictEl = document.querySelector<HTMLElement>("#verdict")!;
+
+let phase: Phase = "idle";
+let lightsOutAt: number | null = null;
+let timers: number[] = [];
+let best: number | null = readBest();
+let jumps = 0;
+
+// --- storage: best effort, must work when unavailable (CLAUDE.md "Storage")
+
+function readBest(): number | null {
+  try {
+    const raw = localStorage.getItem(BEST_KEY);
+    if (raw === null) return null;
+    const n = Number.parseInt(raw, 10);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
 }
+
+function writeBest(ms: number): void {
+  try {
+    localStorage.setItem(BEST_KEY, String(ms));
+  } catch {
+    // storage disabled; the page still works, we just don't persist.
+  }
+}
+
+// --- the sequence
+
+function clearTimers(): void {
+  for (const t of timers) window.clearTimeout(t);
+  timers = [];
+}
+
+function setLit(count: number): void {
+  lights.forEach((el, i) => el.classList.toggle("on", i < count));
+}
+
+function arm(): void {
+  if (phase !== "idle" && phase !== "done") return;
+  phase = "arming";
+  lightsOutAt = null;
+  resultEl.textContent = "";
+  resultEl.dataset.kind = "";
+  padLabel.textContent = "Hold…";
+  pad.dataset.phase = "arming";
+  setLit(0);
+
+  for (let i = 1; i <= 5; i++) {
+    timers.push(
+      window.setTimeout(() => {
+        setLit(i);
+        if (i === 5) phase = "lit";
+      }, i * LIGHT_INTERVAL_MS),
+    );
+  }
+
+  const hold = randomHoldMs();
+  timers.push(
+    window.setTimeout(
+      () => {
+        setLit(0);
+        gantry.classList.add("out");
+        // Only start the clock once the lights-out frame has actually
+        // painted — never from the setTimeout that scheduled it.
+        requestAnimationFrame(() => {
+          lightsOutAt = performance.now();
+          phase = "out";
+          padLabel.textContent = "GO — release!";
+          pad.dataset.phase = "out";
+        });
+      },
+      5 * LIGHT_INTERVAL_MS + hold,
+    ),
+  );
+}
+
+function release(releaseAt: number): void {
+  if (phase === "idle" || phase === "done") return;
+  clearTimers();
+  const attempt = classifyRelease(lightsOutAt, releaseAt);
+  finish(attempt);
+}
+
+function finish(attempt: Attempt): void {
+  phase = "done";
+  gantry.classList.remove("out");
+  setLit(0);
+  pad.dataset.phase = "done";
+  padLabel.textContent = "Again";
+
+  if (attempt.kind === "jump-start") {
+    jumps += 1;
+    jumpsEl.textContent = String(jumps);
+    resultEl.dataset.kind = "jump";
+    resultEl.textContent = "Jump start. You went before the lights did.";
+    verdictEl.textContent =
+      "A jump start in a race is a penalty, not a fast lap. It doesn't count here either.";
+  } else {
+    resultEl.dataset.kind = "time";
+    resultEl.textContent = `${attempt.ms} ms`;
+    const updated = nextBest(best, attempt);
+    if (updated !== best && updated !== null) {
+      best = updated;
+      writeBest(best);
+    }
+    bestEl.textContent = best === null ? "—" : `${best} ms`;
+    renderMarker(attempt.ms);
+    verdictEl.textContent = verdictFor(attempt.ms);
+  }
+}
+
+function verdictFor(ms: number): string {
+  const f1 = reactions.bands.find((b) => b.id === "f1-grid-reported")!;
+  if (ms <= f1.highMs) {
+    return `${ms} ms sits inside the range reported for an F1 grid at lights out. That is the point: on this one task, the gap is small enough to fall through.`;
+  }
+  const gap = ms - f1.highMs;
+  return `${ms} ms — ${gap} ms outside the reported F1 range. Worth knowing how small that gap is compared to every other thing a driver does.`;
+}
+
+// --- the comparison
+
+function scale(ms: number): number {
+  const min = 100;
+  const max = 500;
+  return Math.max(0, Math.min(1, (ms - min) / (max - min))) * 100;
+}
+
+function renderChart(): void {
+  chartEl.innerHTML = "";
+  for (const band of reactions.bands) {
+    const row = document.createElement("div");
+    row.className = "band-row";
+
+    const label = document.createElement("span");
+    label.className = "band-label";
+    label.textContent = band.label;
+
+    const track = document.createElement("div");
+    track.className = "track";
+
+    const fill = document.createElement("span");
+    fill.className = "band";
+    fill.style.left = `${scale(band.lowMs)}%`;
+    fill.style.width = `${scale(band.highMs) - scale(band.lowMs)}%`;
+    fill.title = band.caveat;
+    track.append(fill);
+
+    const range = document.createElement("span");
+    range.className = "band-range";
+    range.textContent = `${band.lowMs}–${band.highMs} ms`;
+
+    row.append(label, track, range);
+    chartEl.append(row);
+  }
+
+  const you = document.createElement("div");
+  you.className = "band-row you";
+  you.innerHTML =
+    '<span class="band-label">You</span><div class="track"><span class="marker" id="marker" hidden></span></div><span class="band-range" id="marker-value">—</span>';
+  chartEl.append(you);
+}
+
+function renderMarker(ms: number): void {
+  const marker = document.querySelector<HTMLElement>("#marker")!;
+  const value = document.querySelector<HTMLElement>("#marker-value")!;
+  marker.hidden = false;
+  marker.style.left = `${scale(ms)}%`;
+  value.textContent = `${ms} ms`;
+}
+
+// --- input: keyboard primary, pointer at parity (CLAUDE.md "Interaction rules")
+
+document.addEventListener("keydown", (e) => {
+  if (e.code !== "Space") return;
+  e.preventDefault();
+  if (!isArmingKeydown(e)) return; // held-key repeats are not a new press
+  arm();
+});
+
+document.addEventListener("keyup", (e) => {
+  if (!isReleaseKeyup(e)) return;
+  e.preventDefault();
+  release(e.timeStamp);
+});
+
+pad.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  pad.setPointerCapture(e.pointerId);
+  arm();
+});
+
+pad.addEventListener("pointerup", (e) => {
+  e.preventDefault();
+  release(e.timeStamp);
+});
+
+renderChart();
+bestEl.textContent = best === null ? "—" : `${best} ms`;

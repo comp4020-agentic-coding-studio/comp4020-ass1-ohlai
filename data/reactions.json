@@ -1,0 +1,23 @@
+{
+  "note": "Every band below must have a matching sourceId entry in sources.md. See CLAUDE.md 'Data rules'. Figures whose provenance could not be established are not shipped.",
+  "bands": [
+    {
+      "id": "f1-grid-reported",
+      "label": "F1 grid at lights out",
+      "lowMs": 150,
+      "highMs": 250,
+      "sourceId": "f1-start-reaction-reported-range",
+      "provenance": "secondary",
+      "caveat": "Reported range. Primary FIA/FOM start telemetry is not public, so this is not a measured distribution."
+    },
+    {
+      "id": "human-visual-simple",
+      "label": "Typical human, simple visual cue",
+      "lowMs": 250,
+      "highMs": 300,
+      "sourceId": "human-simple-visual-reaction",
+      "provenance": "secondary",
+      "caveat": "Reported range for a simple visual reaction task, not a race start."
+    }
+  ]
+}
