@@ -157,16 +157,47 @@ describe("the page states its core interaction", () => {
     expect(html).toMatch(/id="pad"/);
   });
 
-  // A real start gantry is five columns of four lamps, and only the bottom
-  // pair in a column illuminates. Lights-out clears all of them.
-  it("builds five columns of four lamps", () => {
+  // A real start gantry is five housings, each illuminating independently.
+  // The unlit artwork is the base; a slice of the lit artwork overlays each
+  // housing. Lights-out hides all five at once.
+  it("has one independently addressable column per housing", () => {
     expect(html.match(/class="column"/g)).toHaveLength(5);
-    expect(html.match(/class="lamp"/g)).toHaveLength(20);
+    for (const n of [1, 2, 3, 4, 5]) {
+      expect(html).toContain(`data-column="${n}"`);
+    }
   });
 
-  it("marks each lamp with its row so only the bottom pair can light", () => {
-    for (const row of [1, 2, 3, 4]) {
-      expect(html.match(new RegExp(`data-row="${row}"`, "g"))).toHaveLength(5);
+  it("uses the unlit artwork as the base layer", () => {
+    expect(html).toMatch(/gantry-base[^>]*src="\/gantry-off\.png"/);
+  });
+
+  it("gives the decorative base image an empty alt", () => {
+    expect(html).toMatch(/class="gantry-base"[^>]*alt=""/);
+  });
+});
+
+describe("the gantry artwork ships", () => {
+  const root = resolve(import.meta.dirname, "..");
+  const css = readFileSync(resolve(root, "styles.css"), "utf8");
+
+  it("both source images are present in public/", () => {
+    for (const name of ["gantry-off.png", "gantry-on.png"]) {
+      expect(
+        readFileSync(resolve(root, "public", name)).byteLength,
+      ).toBeGreaterThan(1000);
     }
+  });
+
+  it("overlays a lit slice for every one of the five housings", () => {
+    for (const n of [1, 2, 3, 4, 5]) {
+      expect(css).toContain(`.column[data-column="${n}"]`);
+    }
+    expect(css).toContain("/gantry-on.png");
+  });
+
+  it("extends the crossbeam to both window edges from the artwork itself", () => {
+    expect(css).toContain(".edge-left");
+    expect(css).toContain(".edge-right");
+    expect(css).toMatch(/overflow-x:\s*hidden/);
   });
 });

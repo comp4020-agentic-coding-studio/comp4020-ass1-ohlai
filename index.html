@@ -37,51 +37,19 @@
           role="img"
           aria-label="Formula 1 start gantry: five columns of four lamps, mounted on a crossbeam"
         >
-          <span class="rail rail-a" aria-hidden="true"></span>
-          <span class="rail rail-b" aria-hidden="true"></span>
-          <div class="columns">
-            <div class="column" data-column="1">
-              <span class="mount" aria-hidden="true"></span>
-              <span class="lamp" data-row="1"></span>
-              <span class="lamp" data-row="2"></span>
-              <span class="lamp" data-row="3"></span>
-              <span class="lamp" data-row="4"></span>
-              <span class="mount mount-bottom" aria-hidden="true"></span>
-            </div>
-            <div class="column" data-column="2">
-              <span class="mount" aria-hidden="true"></span>
-              <span class="lamp" data-row="1"></span>
-              <span class="lamp" data-row="2"></span>
-              <span class="lamp" data-row="3"></span>
-              <span class="lamp" data-row="4"></span>
-              <span class="mount mount-bottom" aria-hidden="true"></span>
-            </div>
-            <div class="column" data-column="3">
-              <span class="mount" aria-hidden="true"></span>
-              <span class="lamp" data-row="1"></span>
-              <span class="lamp" data-row="2"></span>
-              <span class="lamp" data-row="3"></span>
-              <span class="lamp" data-row="4"></span>
-              <span class="mount mount-bottom" aria-hidden="true"></span>
-            </div>
-            <div class="column" data-column="4">
-              <span class="mount" aria-hidden="true"></span>
-              <span class="lamp" data-row="1"></span>
-              <span class="lamp" data-row="2"></span>
-              <span class="lamp" data-row="3"></span>
-              <span class="lamp" data-row="4"></span>
-              <span class="mount mount-bottom" aria-hidden="true"></span>
-            </div>
-            <div class="column" data-column="5">
-              <span class="mount" aria-hidden="true"></span>
-              <span class="lamp" data-row="1"></span>
-              <span class="lamp" data-row="2"></span>
-              <span class="lamp" data-row="3"></span>
-              <span class="lamp" data-row="4"></span>
-              <span class="mount mount-bottom" aria-hidden="true"></span>
-            </div>
+          <!-- the crossbeam continued to the window edges, sampled from the
+               artwork's own outermost pixels so it matches exactly -->
+          <span class="edge edge-left" aria-hidden="true"></span>
+          <span class="edge edge-right" aria-hidden="true"></span>
+
+          <div class="gantry-stage">
+            <img class="gantry-base" src="/gantry-off.png" alt="" />
+            <span class="column" data-column="1"></span>
+            <span class="column" data-column="2"></span>
+            <span class="column" data-column="3"></span>
+            <span class="column" data-column="4"></span>
+            <span class="column" data-column="5"></span>
           </div>
-          <span class="crossbar" aria-hidden="true"></span>
         </div>
 
         <button
