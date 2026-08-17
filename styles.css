@@ -83,13 +83,67 @@ body {
   color: var(--cream);
 }
 
-/* The interaction lives in the racing line between the two panels, so it has
-   to stay narrow enough to fit the corridor and above the artwork. */
+/* --- the hanging sign ---------------------------------------------------
+   One PNG, cropped into two pieces by background maths rather than by making
+   two files. In sign-nobar.png (1086x1448) the board occupies x 148-937,
+   y 374-1341, with its hanging straps directly above at y 90-374.
+
+   Each piece scales the image so its own region fills the element:
+     width  1086/790 = 137.5%      and the x offset is the same for both,
+     -148/(1086-790) = -50%, so the straps stay registered to the board.
+
+   The straps keep the artwork's aspect so they never distort; the board is
+   free to stretch vertically with however much content it holds, which only
+   stretches flat metal. */
+
+.sign {
+  max-width: 32rem;
+
+  /* The gantry PNG carries ~16% transparent space below its bottom bar, so
+     the straps would otherwise start well clear of the bar and float. This
+     closes that gap (less the -4% the gantry already pulls back) and leaves a
+     slight overlap, so the straps read as bolted to the bar. */
+  margin: -14.2% auto 0;
+}
+
+.sign-straps {
+  display: block;
+  aspect-ratio: 790 / 284;
+  background-image: url("/sign-nobar.png");
+  background-repeat: no-repeat;
+  background-size: 137.5% 509.9%;
+  background-position: -50% -7.73%;
+}
+
+.sign-board {
+  background-image: url("/sign-nobar.png");
+  background-repeat: no-repeat;
+  background-size: 137.5% 149.59%;
+  background-position: -50% -77.92%;
+
+  /* clear of the bolted frame, whose inner edge sits ~5.7% in */
+  padding: 8% 9% 9%;
+}
+
+/* the board is the panel now, so the sections carry no chrome of their own */
+.sign-board section {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.sign-board section + section {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgb(243 237 225 / 16%);
+}
+
+/* The interaction lives below the sign. */
 .controls {
   position: relative;
   z-index: 2;
   max-width: 20rem;
-  margin: 0 auto;
+  margin: 2rem auto 0;
   text-align: center;
 }
 
@@ -290,78 +344,7 @@ h2 {
   pointer-events: none;
 }
 
-.scene-inner {
-  /* wider than the reading column so the panels sit out over the grandstands
-     and leave the racing line clear between them */
-  max-width: 82rem;
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 2rem) 3rem;
-  display: grid;
-  gap: clamp(1rem, 3vw, 2rem);
-}
 
-/* a timing-board panel so the data stays legible over the track */
-.scene section {
-  background: rgb(14 14 16 / 86%);
-  border: 1px solid rgb(243 237 225 / 14%);
-  border-radius: 0.4rem;
-  padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 1.5rem;
-  backdrop-filter: blur(3px);
-}
-
-.scene h2 {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
-
-/* Overlay the panels on the grandstands so the whole straight stays visible
-   beneath them. 72rem, not 60: below this the two panels plus the racing-line
-   corridor between them don't fit side by side, and the controls end up
-   underneath a panel. Narrower than this, the panels flow below the artwork
-   instead — which is also the only thing that works on a phone, where the
-   stacked panels are far taller than the image. */
-@media (width >= 72rem) {
-  .scene-inner {
-    position: absolute;
-    inset: 0;
-    padding-bottom: 0;
-
-    /* Tops sit just under the gantry's bottom bar. The 34% cancels the pull
-       the scene applies to itself, which scales with viewport width; the
-       fixed offset then walks back up from the bottom of the interaction
-       column to just below the lights. Without the cancellation the panels
-       drift over the gantry as the window widens, because the artwork keeps
-       scaling while the gantry is capped at the reading column's width. */
-    padding-top: calc(34% - 154px);
-
-    /* an explicit centre column keeps the racing line clear at every width,
-       so the controls always have room rather than being squeezed out */
-    grid-template-columns: minmax(0, 1fr) 22rem minmax(0, 1fr);
-    align-items: start;
-    gap: 0;
-    pointer-events: none;
-  }
-
-  .scene section {
-    pointer-events: auto;
-  }
-
-  #comparison {
-    grid-column: 1;
-  }
-
-  #provenance {
-    grid-column: 3;
-  }
-
-  /* panels are narrow here; stacked rows read better than the wide
-     label/track/value split */
-  .scene .band-row {
-    grid-template-columns: 1fr;
-    gap: 0.3rem;
-  }
-}
 
 /* --- pad --- */
 
@@ -512,6 +495,20 @@ code {
     align-items: center;
     gap: 1rem;
   }
+}
+
+/* Sign overrides live down here so they follow the base `h2` and `.band-row`
+   they override, keeping specificity in source order. */
+.sign-board h2 {
+  margin: 0 0 0.75rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* the board is narrow, so stacked rows beat the label/track/value split */
+.sign-board .band-row {
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

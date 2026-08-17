@@ -54,8 +54,50 @@
           </div>
         </div>
 
-        <!-- narrow, so on a wide screen it sits in the racing line between
-             the two panels rather than colliding with them -->
+        <!-- The board hangs off the gantry's bottom bar: the straps are the
+             artwork's own, cropped out of the same PNG as the board. -->
+        <div class="sign">
+          <span class="sign-straps" aria-hidden="true"></span>
+          <div class="sign-board">
+            <section id="comparison" aria-labelledby="comparison-heading">
+              <h2 id="comparison-heading">Where that puts you</h2>
+
+              <dl class="scores">
+                <div>
+                  <dt>Personal best</dt>
+                  <dd id="best">—</dd>
+                </div>
+                <div>
+                  <dt>Jump starts</dt>
+                  <dd id="jumps">0</dd>
+                </div>
+              </dl>
+
+              <div id="chart" class="chart"></div>
+              <p id="verdict" class="verdict">
+                Have a go and your time will appear on the scale.
+              </p>
+            </section>
+
+            <section id="provenance" aria-labelledby="provenance-heading">
+              <h2 id="provenance-heading">Where the numbers come from</h2>
+              <p>
+                Only one number on this page is measured: yours. The bands are
+                <em>reported</em> ranges, not a measured distribution of named
+                drivers — F1's per-start telemetry isn't published, and the
+                figures circulating online trace back to reaction-test sites
+                that cite nothing and disagree with each other.
+              </p>
+              <p>
+                So this page shows a band with its uncertainty visible rather
+                than a bell curve that would look authoritative and be
+                invented. Full provenance, including what could not be
+                sourced, is in <code>data/sources.md</code> in the repository.
+              </p>
+            </section>
+          </div>
+        </div>
+
         <div class="controls">
           <button
             id="pad"
@@ -86,44 +128,6 @@
       >
         <img class="scene-img" src="/track-nosky.png" alt="" />
 
-        <div class="scene-inner">
-          <section id="comparison" aria-labelledby="comparison-heading">
-          <h2 id="comparison-heading">Where that puts you</h2>
-
-          <dl class="scores">
-            <div>
-              <dt>Personal best</dt>
-              <dd id="best">—</dd>
-            </div>
-            <div>
-              <dt>Jump starts</dt>
-              <dd id="jumps">0</dd>
-            </div>
-          </dl>
-
-          <div id="chart" class="chart"></div>
-          <p id="verdict" class="verdict">
-            Have a go and your time will appear on the scale.
-          </p>
-        </section>
-
-        <section id="provenance" aria-labelledby="provenance-heading">
-          <h2 id="provenance-heading">Where the numbers come from</h2>
-        <p>
-          Only one number on this page is measured: yours. The bands are
-          <em>reported</em> ranges, not a measured distribution of named
-          drivers — F1's per-start telemetry isn't published, and the figures
-          circulating online trace back to reaction-test sites that cite nothing
-          and disagree with each other.
-        </p>
-        <p>
-          So this page shows a band with its uncertainty visible rather than a
-          bell curve that would look authoritative and be invented. Full
-          provenance, including what could not be sourced, is in
-          <code>data/sources.md</code> in the repository.
-        </p>
-          </section>
-        </div>
       </div>
     </div>
 
