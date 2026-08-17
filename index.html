@@ -11,7 +11,10 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <nav aria-label="Sections">
+    <!-- everything down to the horizon shares one sky gradient; the track
+         artwork's sky is transparent, so the gradient shows through it -->
+    <div class="sky">
+      <nav aria-label="Sections">
       <a href="#test">The test</a>
       <a href="#comparison">The comparison</a>
       <a href="#provenance">Where the numbers come from</a>
@@ -26,9 +29,7 @@
         </p>
       </header>
 
-      <section id="test" aria-labelledby="test-heading">
-        <h2 id="test-heading">Hold, then release</h2>
-
+      <section id="test" aria-label="The test">
         <div
           class="gantry"
           id="gantry"
@@ -69,13 +70,15 @@
 
     <!-- the view down the grid: the panorama continues from the gantry's sky
          into the grandstands and out onto the track -->
-    <div class="straight">
-      <img class="straight-img" src="/track.png" alt="" />
-    </div>
-
-    <div class="tarmac">
-      <main class="tarmac-inner">
-        <section id="comparison" aria-labelledby="comparison-heading">
+      <!-- the view down the grid. The data sits over the grandstands either
+           side, leaving the track itself clear between them. -->
+      <div
+        class="scene"
+        role="img"
+        aria-label="The start straight, seen from the grid"
+      >
+        <div class="scene-inner">
+          <section id="comparison" aria-labelledby="comparison-heading">
           <h2 id="comparison-heading">Where that puts you</h2>
 
           <dl class="scores">
@@ -110,8 +113,9 @@
           provenance, including what could not be sourced, is in
           <code>data/sources.md</code> in the repository.
         </p>
-        </section>
-      </main>
+          </section>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/main.ts"></script>

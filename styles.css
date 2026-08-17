@@ -1,6 +1,10 @@
 /* Palette sampled from the reference photograph of a start gantry: printed
    cobalt ground, tan crossbeam, near-black housings, LED-dot lenses. */
 :root {
+  /* the sky, deep overhead thinning to haze at the horizon */
+  --sky-high: #0a4f96;
+  --sky-mid: #0d6fc0;
+  --sky-low: #4f9fd8;
   --blue: #1d6cb4;
   --blue-deep: #17568f;
   --blue-shadow: #124a7c;
@@ -30,17 +34,7 @@ html {
 
 body {
   margin: 0;
-
-  /* The sky is the track photograph's own topmost pixel row, stretched up
-     behind everything above the straight. Hand-matching a blue would band
-     against the image; taking the colour from the artwork cannot. The
-     gantry PNGs are transparent outside the housings, so this shows through
-     them too and the whole upper page is one continuous sky. */
-  background-color: rgb(8 113 192);
-  background-image: url("/track.png");
-  background-repeat: no-repeat;
-  background-size: 100% 5000%;
-  background-position: 0 0;
+  background-color: var(--sky-high);
   color: var(--cream);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.55;
@@ -79,15 +73,18 @@ main {
   padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 2rem);
 }
 
-/* the sky half ends flush against the straight, so the panorama is unbroken */
+/* The gantry is the point of the page, so the masthead stays compact and the
+   lights sit near the top rather than below a screenful of type. This half
+   also ends flush against the straight, keeping the panorama unbroken. */
 main:first-of-type {
+  padding-top: clamp(0.75rem, 2vw, 1.25rem);
   padding-bottom: 0;
 }
 
 h1 {
-  font-size: clamp(3rem, 14vw, 6rem);
+  font-size: clamp(2.4rem, 9vw, 4.25rem);
   line-height: 0.95;
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem;
   letter-spacing: -0.03em;
   text-transform: uppercase;
   font-weight: 800;
@@ -106,9 +103,14 @@ h2 {
 }
 
 .thesis {
-  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
   max-width: 34rem;
+  margin: 0;
   color: #dce9f5;
+}
+
+.intro {
+  margin-bottom: 0.5rem;
 }
 
 /* --- gantry -------------------------------------------------------------
@@ -223,67 +225,77 @@ h2 {
   background-position: 87.563% 0;
 }
 
+/* One sky spanning everything above the tarmac. The track artwork's sky is
+   transparent, so this gradient shows through it right down to the treeline
+   and grandstands — there is no colour to match and nothing can band. */
+.sky {
+  background-image: linear-gradient(
+    180deg,
+    var(--sky-high) 0%,
+    var(--sky-mid) 55%,
+    var(--sky-low) 100%
+  );
+}
+
 /* --- the straight -------------------------------------------------------
    The page reads as one vertical panorama: sky, gantry, sky, grandstands,
    then the track running out under the reader. The artwork's own sky sits at
    the top of this image, so it joins the gantry's sky with no seam. */
 
-.straight {
+.scene {
   position: relative;
   width: 100vw;
   margin-left: 50%;
   transform: translateX(-50%);
-  line-height: 0;
-}
 
-.straight-img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+  /* The artwork carries roughly a quarter of transparent sky above the
+     grandstands. Pulling that back up costs nothing — the same gradient sits
+     behind it — and brings the horizon above the fold instead of hiding it
+     under a screenful of empty blue. */
+  margin-top: -18%;
 
-/* The tarmac carries on where the photograph stops. Rather than guessing a
-   colour that would band against the image, it stretches the artwork's own
-   bottom pixel row downwards, so the grass verges and the asphalt continue
-   in the right places at any height. */
-.tarmac {
-  position: relative;
-  width: 100vw;
-  margin-left: 50%;
-  transform: translateX(-50%);
-  margin-top: -1px; /* close the rounding gap under the image */
-  background-image: url("/track.png");
+  /* The track is the backdrop rather than a block of its own, so the panels
+     sit on it and the page ends where the track does. No continuation strip
+     is needed. */
+  background-image: url("/track-nosky.png");
   background-repeat: no-repeat;
-  background-size: 100% 100000%;
-  background-position: 0 100%;
+  background-position: center top;
+  background-size: 100% auto;
 }
 
-.tarmac-inner {
-  max-width: 46rem;
+.scene-inner {
+  /* wider than the reading column so the panels sit out over the grandstands
+     and leave the racing line clear between them */
+  max-width: 82rem;
   margin: 0 auto;
-  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 2rem) 5rem;
+  padding: 22% clamp(1rem, 3vw, 2rem) 4%;
+  display: grid;
+  gap: clamp(1rem, 3vw, 2rem);
 }
 
 /* a timing-board panel so the data stays legible over the track */
-.tarmac section {
-  background: rgb(14 14 16 / 82%);
+.scene section {
+  background: rgb(14 14 16 / 86%);
   border: 1px solid rgb(243 237 225 / 14%);
   border-radius: 0.4rem;
   padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 1.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
 }
 
-/* the trailing margin would otherwise escape the tarmac and show sky
-   below the end of the track */
-.tarmac section:last-child {
-  margin-bottom: 0;
-}
-
-.tarmac h2 {
+.scene h2 {
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
+}
+
+@media (width >= 60rem) {
+  .scene-inner {
+    /* two panels, one over each grandstand, with the track between them */
+    grid-template-columns: minmax(0, 27rem) minmax(0, 27rem);
+    justify-content: space-between;
+    align-items: start;
+    gap: 0;
+  }
 }
 
 /* --- pad --- */
@@ -319,15 +331,19 @@ h2 {
 .hint {
   color: var(--muted);
   font-size: 0.9rem;
+  margin: 0.5rem 0 0;
 }
 
 .result {
   display: block;
-  font-size: clamp(2rem, 9vw, 3.5rem);
+  font-size: clamp(1.75rem, 7vw, 3rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  min-height: 1.2em;
-  margin: 1rem 0;
+
+  /* reserved so the layout doesn't jump when a time lands, but no larger
+     than the line it has to hold */
+  min-height: 1.15em;
+  margin: 0.5rem 0 0;
 }
 
 .result[data-kind="jump"] {
