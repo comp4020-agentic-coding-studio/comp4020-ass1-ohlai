@@ -357,6 +357,12 @@ h2 {
      straight up through both costs nothing — the same gradient sits behind
      them — and brings the grandstands right up under the lights. */
   margin-top: -34%;
+
+  /* The straight is the frame the cars leave through. The launch carries them
+     past the bottom edge of the artwork; without this they would keep going
+     over the sections below it. Only the artwork and the cars live in here,
+     so there is nothing else this can clip. */
+  overflow: hidden;
 }
 
 /* An <img>, not a background: the whole straight has to stay in frame down to
@@ -368,7 +374,7 @@ h2 {
   pointer-events: none;
 }
 
-/* --- the front row -----------------------------------------------------
+/* --- the back row ------------------------------------------------------
    The two cars, sitting on the grid the track artwork already paints. One
    slice of `cars.png` each rather than the whole PNG scaled: the two cars
    sit closer together in that image than the two boxes do on this track, so
@@ -377,21 +383,37 @@ h2 {
 
    Every number below is measured from the sources, not guessed. In
    `cars.png` (1750x700) the Ferrari occupies x 54-597, y 63-624 and the
-   McLaren x 1181-1726, y 58-619. In `track-nosky.png` (1373x1145) the
-   front-row boxes are x 451-571 and x 792-913, both with their near edge —
-   where the tyres meet the tarmac — at y 944. Each value is one of those
-   divided by its own image's dimension, so the cars stay welded to the
-   tarmac at every viewport width. */
+   McLaren x 1181-1726, y 58-619.
+
+   `track-nosky.png` (1373x1145) paints six grid rows. Scanning between the
+   two lane lines for the painted box edges puts their near edges — where the
+   tyres meet the tarmac — at y 624, 654, 692, 746, 822 and 944, the last
+   being the front row. The cars sit on the **back** row, y 624, whose boxes
+   are x 583-633 and x 731-784. Far up the straight the cars are small, which
+   leaves the grid itself visible and gives them room to run.
+
+   Each value is one of those divided by its own image's dimension, so the
+   cars stay welded to the tarmac at every viewport width. */
 
 .grid-car {
   position: absolute;
 
-  /* (1145 - 944) / 1145 — tyres on the box's near edge, so the car reads as
+  /* (1145 - 624) / 1145 — tyres on the box's near edge, so the car reads as
      standing in its box rather than hovering over it. */
-  bottom: 17.554%;
+  bottom: 45.502%;
   background-image: url("/cars.png");
   background-repeat: no-repeat;
   pointer-events: none;
+
+  /* The launch scales the car up from its own tyre line, so the contact point
+     stays put as it grows. */
+  transform-origin: bottom center;
+
+  /* Promote both cars to their own layer now, not at lights out. The launch
+     starts on the same frame the clock is measured from, and a layer created
+     on that frame would put compositing work on the one frame that must not
+     be delayed. */
+  will-change: transform;
 }
 
 /* Each car is sized to its own box: width from the painted box, height from
@@ -402,21 +424,67 @@ h2 {
    the box and leaves the other one outside it. */
 
 .grid-car-left {
-  left: 32.847%; /* 451 / 1373 */
-  width: 8.813%; /* 121 / 1373 */
-  height: 10.917%; /* 121 * (562 / 544) / 1145 */
+  left: 42.462%; /* 583 / 1373 */
+  width: 3.714%; /* 51 / 1373 */
+  height: 4.602%; /* 51 * (562 / 544) / 1145 */
+
+  /* Drifting outward as it comes on, because the lanes widen toward the
+     viewer: a car holding its own lane still tracks away from the centre. */
+  --drift: -300%;
+
   background-size: 321.691% 124.555%;
   background-position: 4.478% 45.652%;
 }
 
 .grid-car-right {
-  left: 57.684%; /* 792 / 1373 */
-  width: 8.885%; /* 122 / 1373 */
-  height: 10.967%; /* 122 * (562 / 546) / 1145 */
+  left: 53.241%; /* 731 / 1373 */
+  width: 3.933%; /* 54 / 1373 */
+  height: 4.854%; /* 54 * (562 / 546) / 1145 */
+
+  --drift: 300%;
+
   background-size: 320.513% 124.555%;
   background-position: 98.09% 42.029%;
 }
 
+/* --- the launch --------------------------------------------------------
+   Lights out and the cars go. They come down the straight toward the reader
+   and out of frame past the bottom edge.
+
+   `translateY` and `--drift` are percentages of the car's own box, so the
+   launch travels the same fraction of the straight at every viewport. 2000%
+   of a car's height carries its tyre line well past the bottom of the
+   artwork, and scale(8) is the size it should have grown to by the time it
+   reaches the reader — the painted boxes themselves grow 2.4x over the six
+   rows, so the straight is steeper than it looks.
+
+   An animation rather than a transition, so removing the class snaps the
+   cars back to the grid rather than reversing them up the road. The reset
+   happens in `arm()`, under the first red light, where nobody is looking at
+   the tarmac. */
+
+@keyframes launch {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(var(--drift), 2000%) scale(8);
+  }
+}
+
+.scene.launched .grid-car {
+  /* Ease *in*: a standing start is slow off the line and still accelerating
+     when it passes you. A linear car looks like it is being dragged. */
+  animation: launch 1.6s cubic-bezier(0.45, 0, 0.9, 0.55) forwards;
+}
+
+/* Not in lockstep — one car is always a fraction slower away than the
+   other, and two identical launches read as one object. */
+.scene.launched .grid-car-right {
+  animation-duration: 1.75s;
+  animation-delay: 0.06s;
+}
 
 
 /* --- pad --- */
@@ -764,5 +832,13 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .column {
     transition: none;
+  }
+
+  /* The launch is decoration — the lights going out is the signal, and it
+     stays. Cars that simply hold their grid slots lose nothing that is being
+     measured or explained. */
+  .scene.launched .grid-car,
+  .scene.launched .grid-car-right {
+    animation: none;
   }
 }

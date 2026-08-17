@@ -14,6 +14,7 @@ const BEST_KEY = "lights-out:best";
 type Phase = "idle" | "arming" | "lit" | "out" | "done";
 
 const gantry = document.querySelector<HTMLElement>("#gantry")!;
+const scene = document.querySelector<HTMLElement>(".scene")!;
 const columns = [...document.querySelectorAll<HTMLElement>(".column")];
 const pad = document.querySelector<HTMLButtonElement>("#pad")!;
 const padLabel = document.querySelector<HTMLElement>("#pad-label")!;
@@ -81,6 +82,11 @@ function arm(): void {
   pad.dataset.phase = "arming";
   setLit(0);
 
+  // Put the cars back on the grid for the new attempt. Done here, under the
+  // first red light, rather than at the end of the last attempt: the previous
+  // start should stay finished on screen while the visitor reads their time.
+  scene.classList.remove("launched");
+
   for (let i = 1; i <= 5; i++) {
     timers.push(
       window.setTimeout(() => {
@@ -96,6 +102,12 @@ function arm(): void {
       () => {
         setLit(0);
         gantry.classList.add("out");
+        // The cars go on the same frame the lights do, because that is what
+        // lights out means. Both cars are already on their own compositor
+        // layer (`will-change` in the stylesheet), so starting the animation
+        // adds no layout or paint work to this frame — the frame the clock
+        // below is measured from.
+        scene.classList.add("launched");
         // Only start the clock once the lights-out frame has actually
         // painted — never from the setTimeout that scheduled it.
         requestAnimationFrame(() => {
