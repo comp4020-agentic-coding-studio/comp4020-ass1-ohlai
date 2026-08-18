@@ -2,6 +2,8 @@
 
 **[comp4020-agentic-coding-studio.github.io/comp4020-ass1-ohlai](https://comp4020-agentic-coding-studio.github.io/comp4020-ass1-ohlai/)**
 
+**Process overview: [PROCESS.md](PROCESS.md)**
+
 An interactive explainer about reaction time at a Formula 1 race start.
 
 Hold the space bar. Five red lights come on one by one, and after a randomised
